@@ -4,10 +4,9 @@ mod components;
 use components::*;
 mod systems;
 mod worldstate;
-use worldstate::*;
 use rltk::{RltkBuilder, RGB};
 use specs::prelude::*;
-
+use worldstate::*;
 
 fn main() -> rltk::BError {
     let context = RltkBuilder::simple80x50()
@@ -17,7 +16,7 @@ fn main() -> rltk::BError {
 
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
-    gs.ecs.register::<LeftMover>();
+    //gs.ecs.register::<LeftMover>();
     gs.ecs.register::<Player>();
 
     gs.ecs
@@ -28,10 +27,10 @@ fn main() -> rltk::BError {
             fg: RGB::named(rltk::YELLOW),
             bg: RGB::named(rltk::BLACK),
         })
-        .with(Player{})
-    .build();
+        .with(Player {})
+        .build();
 
-    for i in 0..10{
+    /*for i in 0..10{
         gs.ecs
         .create_entity()
             .with(Position{x: i*7, y: 20})
@@ -42,7 +41,7 @@ fn main() -> rltk::BError {
             })
             .with(LeftMover{})
             .build();
-    }
+    }*/
 
     rltk::main_loop(context, gs)
 }
