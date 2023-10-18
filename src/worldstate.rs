@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::maps::*;
 use crate::systems::*;
 use rltk::prelude::*;
 use specs::prelude::*;
@@ -16,7 +17,7 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
         player_input(self, ctx);
-        self.run_systems();
+        draw_map(&self.ecs.fetch::<Vec<TileType>>(), ctx);
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
 

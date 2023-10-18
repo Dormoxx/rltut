@@ -4,9 +4,11 @@ mod components;
 use components::*;
 mod systems;
 mod worldstate;
+use worldstate::*;
+mod maps;
+use maps::*;
 use rltk::{RltkBuilder, RGB};
 use specs::prelude::*;
-use worldstate::*;
 
 fn main() -> rltk::BError {
     let context = RltkBuilder::simple80x50()
@@ -42,6 +44,8 @@ fn main() -> rltk::BError {
             .with(LeftMover{})
             .build();
     }*/
+
+    gs.ecs.insert(new_map());
 
     rltk::main_loop(context, gs)
 }
