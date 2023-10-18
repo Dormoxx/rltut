@@ -25,6 +25,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
             VirtualKeyCode::Right | VirtualKeyCode::Numpad6 => try_move_player(1, 0, &mut gs.ecs),
             VirtualKeyCode::Up | VirtualKeyCode::Numpad8    => try_move_player(0, -1, &mut gs.ecs),
             VirtualKeyCode::Down | VirtualKeyCode::Numpad2  => try_move_player(0, 1, &mut gs.ecs),
+            VirtualKeyCode::Escape                          => rltk::BTerm::quit(ctx),
             _ => {}
         },
     }
