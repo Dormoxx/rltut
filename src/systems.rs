@@ -1,5 +1,5 @@
-use crate::{Map, Player, Position, Viewshed};
-use rltk::{field_of_view, Point};
+use crate::{Map, Player, Position, Viewshed, components::Monster, Named};
+use rltk::{field_of_view, Point, console};
 use specs::prelude::*;
 
 pub struct VisibilitySystem {}
@@ -35,6 +35,27 @@ impl<'a> System<'a> for VisibilitySystem {
                         map.visible_tiles[idx] = true;
                     }
                 }
+            }
+        }
+    }
+}
+
+pub struct MonsterAISystem{}
+
+impl<'a> System<'a> for MonsterAISystem{
+    type SystemData = (
+        ReadExpect<'a, Point>,
+        ReadStorage<'a, Viewshed>,
+        ReadStorage<'a, Monster>,
+        ReadStorage<'a, Named>
+    );
+
+    fn run(&mut self, data: Self::SystemData){
+        let (player_pos, viewshed, monster, name) = data;
+
+        for (viewshed, _monster, name) in (&viewshed, &monster, &name).join(){
+            if viewshed.visible_tiles.contains(&*&player_pos){
+                console::log(format!("{} does thing", name.name));
             }
         }
     }

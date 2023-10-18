@@ -25,5 +25,10 @@ pub struct Viewshed {
     pub dirty: bool,
 }
 
-/*#[derive(Component)]
-pub struct LeftMover{}*/
+#[derive(Component)]
+pub struct Monster{}
+
+#[derive(Component)]
+pub struct Named{
+    pub name: String,
+}
