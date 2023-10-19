@@ -1,6 +1,6 @@
 use rltk::RGB;
 use specs::prelude::*;
-use specs_derive::Component;
+use specs_derive::*;
 
 #[derive(Component)]
 pub struct Position {

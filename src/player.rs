@@ -1,4 +1,4 @@
-use crate::{components::*, maps::*, State, RunState};
+use crate::{components::*, map::*, State, RunState};
 use rltk::{Rltk, VirtualKeyCode, Point};
 use specs::prelude::*;
 use std::cmp::{max, min};

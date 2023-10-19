@@ -104,6 +104,17 @@ impl Map {
     }
 }
 
+impl BaseMap for Map {
+    fn is_opaque(&self, idx: usize) -> bool {
+        self.tiles[idx as usize] == TileType::Wall
+    }
+}
+
+impl Algorithm2D for Map {
+    fn dimensions(&self) -> rltk::Point {
+        Point::new(self.width, self.height)
+    }
+}
 pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
     let map = ecs.fetch::<Map>();
     let mut x = 0;
@@ -136,14 +147,3 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
     }
 }
 
-impl BaseMap for Map {
-    fn is_opaque(&self, idx: usize) -> bool {
-        self.tiles[idx as usize] == TileType::Wall
-    }
-}
-
-impl Algorithm2D for Map {
-    fn dimensions(&self) -> rltk::Point {
-        Point::new(self.width, self.height)
-    }
-}
