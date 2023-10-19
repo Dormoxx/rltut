@@ -1,6 +1,6 @@
-use specs::prelude::*;
 use crate::{Map, Player, Position, Viewshed};
 use rltk::{field_of_view, Point};
+use specs::prelude::*;
 
 pub struct VisibilitySystem {}
 
@@ -27,7 +27,9 @@ impl<'a> System<'a> for VisibilitySystem {
 
                 let _p: Option<&Player> = player.get(ent);
                 if let Some(_p) = _p {
-                    for t in map.visible_tiles.iter_mut(){*t = false};
+                    for t in map.visible_tiles.iter_mut() {
+                        *t = false
+                    }
                     for vis in viewshed.visible_tiles.iter() {
                         let idx = map.xy_idx(vis.x, vis.y);
                         map.revealed_tiles[idx] = true;

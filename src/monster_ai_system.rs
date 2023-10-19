@@ -1,22 +1,57 @@
+use crate::{Map, Monster, Named, Position, RunState, Viewshed, WantsToMelee};
+use rltk::{console, Point};
 use specs::prelude::*;
-use crate::{Viewshed, components::Monster, Named};
-use rltk::{Point, console};
-pub struct MonsterAISystem{}
+pub struct MonsterAISystem {}
 
-impl<'a> System<'a> for MonsterAISystem{
+impl<'a> System<'a> for MonsterAISystem {
     type SystemData = (
+        WriteExpect<'a, Map>,
         ReadExpect<'a, Point>,
-        ReadStorage<'a, Viewshed>,
+        ReadExpect<'a, Entity>,
+        ReadExpect<'a, RunState>,
+        Entities<'a>,
+        WriteStorage<'a, Viewshed>,
         ReadStorage<'a, Monster>,
-        ReadStorage<'a, Named>
+        WriteStorage<'a, Position>,
+        WriteStorage<'a, WantsToMelee>,
     );
 
-    fn run(&mut self, data: Self::SystemData){
-        let (player_pos, viewshed, monster, name) = data;
-
-        for (viewshed, _monster, name) in (&viewshed, &monster, &name).join(){
-            if viewshed.visible_tiles.contains(&*&player_pos){
-                console::log(format!("{} does thing", name.name));
+    fn run(&mut self, data: Self::SystemData) {
+        let (
+            mut map,
+            player_pos,
+            player_entity,
+            runstate,
+            entities,
+            mut viewshed,
+            monster,
+            mut position,
+            mut wants_to_melee,
+        ) = data;
+        if *runstate != RunState::MonsterTurn{return;}
+        for (entity, mut viewshed, _monster, mut pos) in
+            (&entities, &mut viewshed, &monster, &mut position).join()
+        {
+            let distance =
+                rltk::DistanceAlg::Pythagoras.distance2d(Point::new(pos.x, pos.y), *player_pos);
+            if distance < 1.5 {
+                wants_to_melee.insert(entity, WantsToMelee{target: *player_entity}).expect("unable to insert attack");
+            }
+            else if viewshed.visible_tiles.contains(&*player_pos) {
+                let path = rltk::a_star_search(
+                    map.xy_idx(pos.x, pos.y) as i32,
+                    map.xy_idx(player_pos.x, player_pos.y) as i32,
+                    &mut *map,
+                );
+                if path.success && path.steps.len() > 1 {
+                    let mut idx = map.xy_idx(pos.x, pos.y);
+                    map.blocked[idx] = false;
+                    pos.x = path.steps[1] as i32 % map.width;
+                    pos.y = path.steps[1] as i32 / map.width;
+                    idx = map.xy_idx(pos.x, pos.y);
+                    map.blocked[idx] = true;
+                    viewshed.dirty = true;
+                }
             }
         }
     }
