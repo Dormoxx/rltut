@@ -3,9 +3,9 @@ use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, SmallVec, R
 use specs::prelude::*;
 use std::cmp::{max, min};
 
-const MAP_WIDTH: usize = 80;
-const MAP_HEIGHT: usize = 43;
-const MAP_CELL_COUNT: usize = MAP_HEIGHT * MAP_WIDTH;
+pub const MAP_WIDTH: usize = 80;
+pub const MAP_HEIGHT: usize = 43;
+pub const MAP_CELL_COUNT: usize = MAP_HEIGHT * MAP_WIDTH;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum TileType {
@@ -213,7 +213,7 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
             ctx.set(x, y, fg, RGB::from_f32(0., 0., 0.), glyph);
         }
         x += 1;
-        if x > MAP_WIDTH-1 {
+        if x > MAP_WIDTH - 1 {
             x = 0;
             y += 1;
         }

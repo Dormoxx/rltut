@@ -1,5 +1,5 @@
 use crate::{Map, Monster, Position, RunState, Viewshed, WantsToMelee};
-use rltk::{Point};
+use rltk::Point;
 use specs::prelude::*;
 pub struct MonsterAISystem {}
 
@@ -28,16 +28,24 @@ impl<'a> System<'a> for MonsterAISystem {
             mut position,
             mut wants_to_melee,
         ) = data;
-        if *runstate != RunState::MonsterTurn{return;}
+        if *runstate != RunState::MonsterTurn {
+            return;
+        }
         for (entity, viewshed, _monster, pos) in
             (&entities, &mut viewshed, &monster, &mut position).join()
         {
             let distance =
                 rltk::DistanceAlg::Pythagoras.distance2d(Point::new(pos.x, pos.y), *player_pos);
             if distance < 1.5 {
-                wants_to_melee.insert(entity, WantsToMelee{target: *player_entity}).expect("unable to insert attack");
-            }
-            else if viewshed.visible_tiles.contains(&*player_pos) {
+                wants_to_melee
+                    .insert(
+                        entity,
+                        WantsToMelee {
+                            target: *player_entity,
+                        },
+                    )
+                    .expect("unable to insert attack");
+            } else if viewshed.visible_tiles.contains(&*player_pos) {
                 let path = rltk::a_star_search(
                     map.xy_idx(pos.x, pos.y) as i32,
                     map.xy_idx(player_pos.x, player_pos.y) as i32,

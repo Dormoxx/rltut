@@ -1,5 +1,4 @@
-use crate::{CombatStats, Named, SufferDamage, WantsToMelee, GameLog};
-use rltk::console;
+use crate::{CombatStats, GameLog, Named, SufferDamage, WantsToMelee};
 use specs::prelude::*;
 
 pub struct MeleeCombatSystem {}
@@ -25,9 +24,15 @@ impl<'a> System<'a> for MeleeCombatSystem {
                     let target_name = names.get(wants_melee.target).unwrap();
                     let damage = i32::max(0, stats.power - target_stats.defense);
                     if damage == 0 {
-                        log.entries.push(format!("{} is unable to damage {}", &name.name, &target_name.name));
+                        log.entries.push(format!(
+                            "{} is unable to damage {}",
+                            &name.name, &target_name.name
+                        ));
                     } else {
-                        log.entries.push(format!("{} hits {} for {} hp!", &name.name, &target_name.name, damage));
+                        log.entries.push(format!(
+                            "{} hits {} for {} hp!",
+                            &name.name, &target_name.name, damage
+                        ));
                         SufferDamage::new_damage(&mut inflict_damage, wants_melee.target, damage);
                     }
                 }
