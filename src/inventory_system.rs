@@ -74,48 +74,54 @@ impl<'a> System<'a> for ItemUseSystem {
         ) = data;
         for (entity, use_item, stats) in (&entities, &wants_use, &mut combat_stats).join() {
             let consumable = consumables.get(use_item.item);
-                match consumable {
-                    None => {}
-                    Some(_) =>{
-                        entities.delete(use_item.item).expect("item  delete failed");
-                    }
+            match consumable {
+                None => {}
+                Some(_) => {
+                    entities.delete(use_item.item).expect("item  delete failed");
                 }
+            }
             let item_heals = healing.get(use_item.item);
-            match item_heals{
-                None =>{}
+            match item_heals {
+                None => {}
                 Some(healer) => {
                     stats.hp = i32::min(stats.max_hp, stats.hp + healer.heal_amount);
-                    if entity == *player_entity{
-                        gamelog.entries.push(format!("You drink {}, healing {} HP!", names.get(use_item.item).unwrap().name, healer.heal_amount));
+                    if entity == *player_entity {
+                        gamelog.entries.push(format!(
+                            "You drink {}, healing {} HP!",
+                            names.get(use_item.item).unwrap().name,
+                            healer.heal_amount
+                        ));
                     }
                 }
             }
             let item_damages = inflict_damage.get(use_item.item);
-            match item_damages{
+            match item_damages {
                 None => {}
                 Some(damage) => {
                     let target_point = use_item.target.unwrap();
                     let idx = map.xy_idx(target_point.x, target_point.y);
                     //used_item = false
-                    for mob in map.tile_content[idx].iter(){
+                    for mob in map.tile_content[idx].iter() {
                         SufferDamage::new_damage(&mut suffer_damage, *mob, damage.damage);
-                        if entity == *player_entity{
+                        if entity == *player_entity {
                             let mob_name = names.get(*mob).unwrap();
                             let item_name = names.get(use_item.item).unwrap();
-                            gamelog.entries.push(format!("You use {} on {}, dealing {} damage!", item_name.name, mob_name.name, damage.damage));
+                            gamelog.entries.push(format!(
+                                "You use {} on {}, dealing {} damage!",
+                                item_name.name, mob_name.name, damage.damage
+                            ));
                         }
                         //used_item = true;
                     }
                 }
             }
-            }
         }
     }
+}
 
+pub struct ItemDropSystem {}
 
-pub struct ItemDropSystem{}
-
-impl<'a> System<'a> for ItemDropSystem{
+impl<'a> System<'a> for ItemDropSystem {
     type SystemData = (
         ReadExpect<'a, Entity>,
         WriteExpect<'a, GameLog>,
@@ -123,23 +129,42 @@ impl<'a> System<'a> for ItemDropSystem{
         WriteStorage<'a, WantsToDropItem>,
         ReadStorage<'a, Named>,
         WriteStorage<'a, Position>,
-        WriteStorage<'a, InBackpack>
+        WriteStorage<'a, InBackpack>,
     );
     fn run(&mut self, data: Self::SystemData) {
-        let (player_entity, mut gamelog, entities, mut wants_drop, names, mut positions, mut backpack) = data;
+        let (
+            player_entity,
+            mut gamelog,
+            entities,
+            mut wants_drop,
+            names,
+            mut positions,
+            mut backpack,
+        ) = data;
 
-        for (entity, to_drop) in (&entities, &wants_drop).join(){
-            let mut dropper_pos: Position = Position{x: 0, y:0};
+        for (entity, to_drop) in (&entities, &wants_drop).join() {
+            let mut dropper_pos: Position = Position { x: 0, y: 0 };
             {
                 let dropped_pos = positions.get(entity).unwrap();
                 dropper_pos.x = dropped_pos.x;
                 dropper_pos.y = dropped_pos.y;
             }
-            positions.insert(to_drop.item, Position{x: dropper_pos.x, y: dropper_pos.y}).expect("unable to insert position, drop system");
+            positions
+                .insert(
+                    to_drop.item,
+                    Position {
+                        x: dropper_pos.x,
+                        y: dropper_pos.y,
+                    },
+                )
+                .expect("unable to insert position, drop system");
             backpack.remove(to_drop.item);
 
-            if entity == *player_entity{
-                gamelog.entries.push(format!("You drop {}.", names.get(to_drop.item).unwrap().name));
+            if entity == *player_entity {
+                gamelog.entries.push(format!(
+                    "You drop {}.",
+                    names.get(to_drop.item).unwrap().name
+                ));
             }
         }
         wants_drop.clear();
