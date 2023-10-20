@@ -4,8 +4,8 @@ use crate::rect::*;
 use rltk::{RandomNumberGenerator, RGB};
 use specs::prelude::*;
 
-pub const MAX_MONSTERS: i32 = 0;
-pub const MAX_ITEMS: i32 = 10;
+pub const MAX_MONSTERS: i32 = 3;
+pub const MAX_ITEMS: i32 = 5;
 
 pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
     ecs.create_entity()
@@ -17,7 +17,7 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
             glyph: rltk::to_cp437('@'),
             fg: RGB::named(rltk::YELLOW),
             bg: RGB::named(rltk::BLACK),
-            render_order: 0
+            render_order: 0,
         })
         .with(Player {})
         .with(Viewshed {
@@ -29,7 +29,7 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
             name: "Player".to_string(),
         })
         .with(CombatStats {
-            max_hp: 30,
+            max_hp: 69,
             hp: 30,
             defense: 2,
             power: 5,
@@ -49,6 +49,18 @@ pub fn random_monster(ecs: &mut World, x: i32, y: i32) {
     }
 }
 
+fn random_item(ecs: &mut World, x: i32, y: i32){
+    let roll: i32;
+    {
+        let mut rng = ecs.write_resource::<RandomNumberGenerator>();
+        roll = rng.roll_dice(1, 2);
+    }
+    match roll{
+        1 => {health_potion(ecs, x, y)}
+        _ => {magic_missile_scroll(ecs, x, y)}
+    }
+}
+
 fn monster<S: ToString>(ecs: &mut World, x: i32, y: i32, glyph: rltk::FontCharType, name: S) {
     ecs.create_entity()
         .with(Position { x, y })
@@ -56,7 +68,7 @@ fn monster<S: ToString>(ecs: &mut World, x: i32, y: i32, glyph: rltk::FontCharTy
             glyph,
             fg: RGB::named(rltk::RED),
             bg: RGB::named(rltk::BLACK),
-            render_order: 1
+            render_order: 1,
         })
         .with(Viewshed {
             visible_tiles: Vec::new(),
@@ -128,7 +140,7 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
     for idx in item_spawn_points.iter() {
         let x = *idx % MAP_WIDTH;
         let y = *idx / MAP_WIDTH;
-        health_potion(ecs, x as i32, y as i32);
+        random_item(ecs, x as i32, y as i32);
     }
 }
 
@@ -145,6 +157,24 @@ fn health_potion(ecs: &mut World, x: i32, y: i32) {
             name: "Health Potion".to_string(),
         })
         .with(Item {})
-        .with(Potion { heal_amount: 8 })
+        .with(Consumable{})
+        .with(ProvidesHealing { heal_amount: 8 })
+        .build();
+}
+
+fn magic_missile_scroll(ecs: &mut World, x: i32, y: i32){
+    ecs.create_entity()
+        .with(Position{x,y})
+        .with(Renderable{
+            glyph: rltk::to_cp437(')'),
+            fg: RGB::named(rltk::CYAN),
+            bg: RGB::named(rltk::BLACK),
+            render_order: 2
+        })
+        .with(Named{name: "Magic Missile Scroll".to_string()})
+        .with(Item{})
+        .with(Consumable{})
+        .with(Ranged{range:6})
+        .with(InflictsDamage{damage:8})
         .build();
 }
